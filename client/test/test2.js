@@ -18,12 +18,11 @@ function display(err, msgs_info) {
     document.getElementById("main").innerHTML = "<ul>" + list + "</ul>";
 }
 
+var db_with_cache;
+
 function toggle(id, event) {
     var v = event.target.className === "read" ? null: { hide: true };
-    restdb.set(ourDB + "/" + id, v, { allowRedirect: true }, function (err, resp) {
-        if (err) return alert(JSON.stringify(err));
-        event.target.className = v ? "read" : '';
-    });
+    db_with_cache.set(id, v);
 }
 
-restdb.get(ourDB, { allowRedirect: true }, display);
+db_with_cache = restdb_with_cache(restdb, ourDB, { allowRedirect: true }, display);

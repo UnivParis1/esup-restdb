@@ -1,3 +1,5 @@
+// required: conf.url
+// optional: conf.idpId, conf.auth, conf.allowJsonp  
 function restdb_init(conf) {
     "use strict";
 
@@ -14,26 +16,47 @@ function restdb_init(conf) {
     // !! use once at a time
     function jsonp(url, callback) {
         window.restdb_callback = function (v) { callback(null, v); };
-        loadScript(url, [ "callback=window.restdb_callback"], function (evt) { callback({ error: "unknown" })});
+        loadScript(url, [ "callback=window.restdb_callback"], function (evt) { callback({ error: "jsonp failed" })});
     }
 
     function json_xhr(method, url, json, callback) {
         var req = new XMLHttpRequest();
-        if (!req) return;
         req.open(method, url, true);
+
         req.responseType = 'json';
         req.withCredentials = true;
         req.setRequestHeader("Content-Type", "application/json");
+
         req.onload = function () {
             req.status === 200 ? callback(null, req.response) : callback(req.response);
         };
         req.onerror = function () { callback(req.response); };
+
         req.send(json !== null ? JSON.stringify(json) : null);
     }
 
-    function redirect_login(opts) {
-        document.location.href = conf.url + "/.login" + (opts.prompt_none ? '/prompt_none' : '') + "?target=" + encodeURI(document.location.href);
+    function urlWithQuery(url, params) {
+        var firstParam = !url.match(/\?/); 
+        for (var name in params) {
+            var v = params[name];
+            if (v != undefined) {
+                url += (firstParam ? '?' : '&') + name + '=' + encodeURIComponent(v); 
+                firstParam = false;
+            }
+        }
+        return url;
     }
+
+    function redirect_login(opts) {
+        var url = urlWithQuery(conf.url + "/.login", {
+            target: document.location.href,
+            prompt: opts.prompt,
+            idpId: conf.idpId,
+            auth: conf.auth,
+        });
+        document.location.href = url;
+    }
+
     function redirect_login_onerror(callback, opts) {
         return function (err, v) {
             if (err) 
@@ -43,17 +66,20 @@ function restdb_init(conf) {
         };
     }
 
-    function get(url, opts, callback) {
-        var cb = opts.allowRedirect && !(conf.allowJsonp && opts.prompt_none) ? redirect_login_onerror(callback, opts) : callback; 
-        if (conf.allowJsonp) 
+    function get(path, opts, callback) {
+        let url = conf.url + path;
+        var cb = opts.allowRedirect && !(conf.allowJsonp && opts.prompt === 'none') ? redirect_login_onerror(callback, opts) : callback; 
+        if (conf.allowJsonp)
             jsonp(url, cb);
         else 
             json_xhr('GET', url, null, cb);
-    };
-    var set = function (url, json, opts, callback) {
+    }
+
+    function set(path, json, opts, callback) {
+        let url = conf.url + path;
         var cb = opts.allowRedirect ? redirect_login_onerror(callback, opts) : callback; 
         json_xhr(json === null ? 'DELETE' : 'PUT', url, json, cb);
-    };
+    }
 
     return { get: get, set: set };
 }

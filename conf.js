@@ -4,9 +4,15 @@ let conf = {
     mongodb: { 
         url: "mongodb://localhost:27017/restdb-", // the database name will be used as a prefix for restdb database names
     },
-    auth: 'cas', // one of: cas, external
-    cas: {
-        'host': 'cas.univ.fr',
+    auth: {
+        cas: {
+            enabled: true,
+            host: 'cas.univ.fr',
+        },
+        shibboleth: {
+            enabled: false,
+            SessionInitiator: '/Shibboleth.sso/Login',
+        },
     },
     session: {
         'secret': 'XXXrestdbXXX',

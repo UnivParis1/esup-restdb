@@ -82,6 +82,14 @@ const with_acl = (f) => (req, res) => (
         : respondError(res, "Unauthorized")
 );
 
+const login = (req, res) => (
+    req.user && req.user.id
+        ? res.redirect(req.query.target)
+        : respondError(res, "Unauthorized")
+);
+
+router.use("/.files", express.static(__dirname + '/../client'));
+router.get("/.login", login);
 
 router.get("/:db/:collection/\\$user/:id", with_acl(getWithUid));
 router.put('/:db/:collection/\\$user/:id', with_acl(putWithUid));
