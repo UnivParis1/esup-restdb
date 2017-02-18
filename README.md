@@ -2,9 +2,9 @@
 
 Web service to store data from browser.
 
-* authenticates user using CAS
-* JSONP allowed for GETs
+* authenticates user using CAS/Shibboleth
+* JSONP allowed for GETs (CAS only)
 * XHR+CORS for PUT/DELETE/...
 * database names should match CORS Origin, but specific ACLs allowed
 * pseudo sub-table "$user" specific to each users
-* for non-CAS users, "users" data is stored in localStorage via an iframe, or via cookies
+* use option ``allowRedirect`` if you allow restarting your application by redirecting to CAS/IDP. You can use option ``prompt=none`` if you are inside an iframe and do not want user to enter password inside iframe
