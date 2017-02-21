@@ -47,7 +47,9 @@ exports.collection = (db_name, collection_name) => (
             return Promise.resolve(collection);
         } else {
             collection = collections_cache[db_name][collection_name] = client.db(dbPrefix + db_name).collection(collection_name);
-            return collection.createIndex({ uid: 1 }).then(_ => collection);
+            return collection.createIndex({ id: 1, uid: 1 }).then(_ =>
+                collection.createIndex({ expireAt: 1 }, { expireAfterSeconds: 0 })
+            ).then(_ => collection);
         }
     })
 );
@@ -70,6 +72,7 @@ exports.delete = (collection, criteria) => (
 exports.save = (collection, criteria, v) => {
     Object.assign(v, criteria);
     v.modifyTimestamp = new Date();
+    if (v.expireAt) v.expireAt = new Date(v.expireAt);
     console.log("saving in DB:", v);
     return collection.updateOne(criteria, v, {upsert: true}).then(_ => (
         { ok: 1, id: "id" in v ? v.id : v._id }
