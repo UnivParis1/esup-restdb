@@ -75,11 +75,19 @@ function restdb_init(conf) {
             json_xhr('GET', url, null, cb);
     }
 
-    function set(path, json, opts, callback) {
+    function action(method, path, json, opts, callback) {
         let url = conf.url + path;
         var cb = opts.allowRedirect ? redirect_login_onerror(callback, opts) : callback; 
-        json_xhr(json === null ? 'DELETE' : 'PUT', url, json, cb);
+        json_xhr(method, url, json, cb);
     }
 
-    return { get: get, set: set };
+    function set(path, json, opts, callback) {
+        action(json === null ? 'DELETE' : 'PUT', path, json, opts, callback);
+    }
+
+    function add(path, json, opts, callback) {
+        action('POST', path, json, opts, callback);
+    }
+    
+    return { get: get, set: set, add: add };
 }
