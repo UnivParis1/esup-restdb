@@ -49,7 +49,7 @@ function restdb_init(conf) {
 
     function redirect_login(opts) {
         var url = urlWithQuery(conf.url + "/.login", {
-            target: document.location.href,
+            then: document.location.href,
             prompt: opts.prompt,
             idpId: conf.idpId,
             auth: conf.auth,

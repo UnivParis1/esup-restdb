@@ -92,7 +92,7 @@ const with_acl = (f) => (req, res) => (
 
 const login = (req, res) => (
     req.user && req.user.id
-        ? res.redirect(req.query.target)
+        ? res.redirect(req.query.then)
         : respondError(res, "Unauthorized")
 );
 
