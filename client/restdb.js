@@ -1,8 +1,10 @@
 // required: conf.url
-// optional: conf.idpId, conf.auth, conf.allowJsonp  
+// optional: conf.idpId, conf.auth
 function restdb_init(conf) {
     "use strict";
 
+    conf.allowJsonp = !conf.auth || conf.auth === "cas";
+    
     function loadScript(url, params, callback) {
         var elt = document.createElement("script");
         elt.setAttribute("type", "text/javascript");

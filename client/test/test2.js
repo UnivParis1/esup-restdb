@@ -1,6 +1,6 @@
 "use strict";
 
-var restdb = restdb_init({ url: "", allowJsonp: true });
+var restdb = restdb_init({ url: "" });
 var ourDB = "/alerts/msgs_info/$user";
 
 var msgs = [
