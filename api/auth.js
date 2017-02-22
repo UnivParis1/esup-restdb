@@ -50,11 +50,11 @@ const may_login_cas = (req, res, next) => {
 const may_login_shibboleth = (req, res, next) => {
     if (!conf.auth.shibboleth.enabled || req.query.auth && req.query.auth !== 'shibboleth' || !req.query.then) return false;
 
-    let target = url.format({ path: '/.login', query: { auth_checked: 1, then: req.query.then }});
+    let target = url.format({ pathname: '/.login', query: { auth_checked: 1, then: req.query.then }});
     let query = { target: target };
-    if (req.query.idpId) query.entityID = query.idpId;
+    if (req.query.idpId) query.entityID = req.query.idpId;
     if (req.query.prompt === 'none') query.isPassive = true;
-    res.redirect(url.format({ path: conf.auth.shibboleth.SessionInitiator, query: query }));
+    res.redirect(url.format({ pathname: conf.auth.shibboleth.SessionInitiator, query: query }));
     return true;
 };
 
