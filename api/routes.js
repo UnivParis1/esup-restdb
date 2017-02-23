@@ -5,25 +5,30 @@ let utils = require('./utils');
 
 let router = express.Router();
 
-const respondError = (res, err) => {
+const respondError = (req, res, err) => {
     let msg = {error: "" + err};
     if (err.stack) msg.stack = err.stack;
-    res.status(400).json(msg);
+    res.status(400);
+    respondJsonRaw(req, res, msg);
+};
+
+const respondJsonRaw = (req, res, json) => {
+    if (utils.isJsonp(req)) {
+        res.header('Content-type', 'application/javascript; charset=UTF-8');
+        res.send(req.query.callback + '(' + JSON.stringify(json || {}) + ');');  
+    } else {
+        res.json(json || {});
+    }   
 };
 
 const respondJson = (req, res, p) => {
     let logPrefix = req.method + " " + req.path + ":";
     p.then(r => {
         //console.log(logPrefix, r);
-        if (utils.isJsonp(req)) {
-            res.header('Content-type', 'application/javascript; charset=UTF-8');
-            res.send(req.query.callback + '(' + JSON.stringify(r || {}) + ');');  
-        } else {
-            res.json(r || {});
-        }
+        respondJsonRaw(req, res, r);
     }).catch(err => {
         console.error(logPrefix, err + err.stack);
-        respondError(res, err);
+        respondError(req, res, err);
     });
 };
 
@@ -87,13 +92,13 @@ const addWithUid = (req) => collection(req).then(collection => (
 const with_acl = (f) => (req, res) => (
     req.user && req.user.id /* TODO */
         ? respondJson(req, res, f(req))
-        : respondError(res, "Unauthorized")
+        : respondError(req, res, "Unauthorized")
 );
 
 const login = (req, res) => (
     req.user && req.user.id
         ? res.redirect(req.query.then)
-        : respondError(res, "Unauthorized")
+        : respondError(req, res, "Unauthorized")
 );
 
 router.use("/.files", express.static(__dirname + '/../client'));
