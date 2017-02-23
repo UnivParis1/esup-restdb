@@ -89,11 +89,17 @@ const addWithUid = (req) => collection(req).then(collection => (
     db.save(collection, v_addUid(req, v_id(null)), req.body)
 ));
 
-const with_acl = (f) => (req, res) => (
-    req.user && req.user.id /* TODO */
+const check_acl = (req, user_pseudo_collection) => (
+    req.user && (user_pseudo_collection ? req.user.id : req.user.TODO)
+);
+
+const with_acl = (f, user_pseudo_collection) => (req, res) => (
+    check_acl(req, user_pseudo_collection)
         ? respondJson(req, res, f(req))
         : respondError(req, res, "Unauthorized")
 );
+
+const with_user_acl = (f) => with_acl(f, true)
 
 const login = (req, res) => (
     req.user && req.user.id
@@ -104,11 +110,11 @@ const login = (req, res) => (
 router.use("/.files", express.static(__dirname + '/../client'));
 router.get("/.login", login);
 
-router.get("/:db/:collection/\\$user/:id", with_acl(getWithUid));
-router.put('/:db/:collection/\\$user/:id', with_acl(putWithUid));
-router.delete('/:db/:collection/\\$user/:id', with_acl(deleteWithUid));
-router.post('/:db/:collection/\\$user', with_acl(addWithUid));
-router.get('/:db/:collection/\\$user', with_acl(getAllWithUid));
+router.get("/:db/:collection/\\$user/:id", with_user_acl(getWithUid));
+router.put('/:db/:collection/\\$user/:id', with_user_acl(putWithUid));
+router.delete('/:db/:collection/\\$user/:id', with_user_acl(deleteWithUid));
+router.post('/:db/:collection/\\$user', with_user_acl(addWithUid));
+router.get('/:db/:collection/\\$user', with_user_acl(getAllWithUid));
 router.get("/:db/:collection/:id", with_acl(get));
 router.put("/:db/:collection/:id", with_acl(put));
 router.delete("/:db/:collection/:id", with_acl(delete_));
