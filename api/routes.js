@@ -94,7 +94,7 @@ const addWithUid = (req) => collection(req).then(collection => (
 
 const check_acl = (req, user_pseudo_collection) => {
     if (!req.user) return Promise.resolve(false);
-    if (user_pseudo_collection) return Promise.resolve(!!req.user.id);
+    if (user_pseudo_collection && !req.params.collection.match(/^admin_/)) return Promise.resolve(!!req.user.id);
     
     const filter = conf.ldap.admin_filter(req.user, req.params.db);
     return ldap.searchRaw(conf.ldap.base, filter, [], { sizeLimit: 1 }).then(l => l.length)
