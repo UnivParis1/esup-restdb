@@ -1,6 +1,8 @@
 "use strict";
 let express = require('express')
 let db = require('./db')
+let conf = require('../conf');
+let ldap = require('./ldap');
 let utils = require('./utils');
 let triggers = require('./triggers');
 
@@ -90,9 +92,13 @@ const addWithUid = (req) => collection(req).then(collection => (
     db.save(collection, v_addUid(req, v_id(null)), req.body)
 ));
 
-const check_acl = (req, user_pseudo_collection) => (
-    req.user && (user_pseudo_collection ? req.user.id : req.user.TODO)
-);
+const check_acl = (req, user_pseudo_collection) => {
+    if (!req.user) return Promise.resolve(false);
+    if (user_pseudo_collection) return Promise.resolve(!!req.user.id);
+    
+    const filter = conf.ldap.admin_filter(req.user, req.params.db);
+    return ldap.searchRaw(conf.ldap.base, filter, [], { sizeLimit: 1 }).then(l => l.length)
+};
 
 const with_triggers = (f, req) => (
     f(req).then(r => (
@@ -101,9 +107,10 @@ const with_triggers = (f, req) => (
 )
 
 const with_acl = (f, user_pseudo_collection) => (req, res) => (
-    check_acl(req, user_pseudo_collection)
-        ? respondJson(req, res, with_triggers(f, req))
+    check_acl(req, user_pseudo_collection).then(ok => (
+     ok ? respondJson(req, res, with_triggers(f, req))
         : respondError(req, res, "Unauthorized")
+    ))
 );
 
 const with_user_acl = (f) => with_acl(f, true)

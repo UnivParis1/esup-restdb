@@ -10,6 +10,8 @@
     "express": "4.x",
     "express-session": "~1.9.3",
     "express-utils": "~0.1.0",
+    "ldapjs": "^1.0.2",
+    "lodash": "^4.17.5",
     "mongodb": "^2.1.18",
     "session-file-store": "^1.0.0"
   }
