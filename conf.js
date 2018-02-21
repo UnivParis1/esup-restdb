@@ -26,6 +26,8 @@ let conf = {
     cors: {
         origin: true /* TODO */,
     },
+
+    triggers: [ ],
 };
 
 module.exports = conf;

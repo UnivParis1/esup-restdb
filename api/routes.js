@@ -2,6 +2,7 @@
 let express = require('express')
 let db = require('./db')
 let utils = require('./utils');
+let triggers = require('./triggers');
 
 let router = express.Router();
 
@@ -93,9 +94,15 @@ const check_acl = (req, user_pseudo_collection) => (
     req.user && (user_pseudo_collection ? req.user.id : req.user.TODO)
 );
 
+const with_triggers = (f, req) => (
+    f(req).then(r => (
+        triggers.call_(req.method === 'GET' ? 'after_get' : 'after_modification', req.params.db, req)
+    ).then(_ => r))
+)
+
 const with_acl = (f, user_pseudo_collection) => (req, res) => (
     check_acl(req, user_pseudo_collection)
-        ? respondJson(req, res, f(req))
+        ? respondJson(req, res, with_triggers(f, req))
         : respondError(req, res, "Unauthorized")
 );
 
