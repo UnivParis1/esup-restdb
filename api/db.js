@@ -30,7 +30,7 @@ const v_export_id = (v) => {
 }
 
 const toObjectID = (id) => (
-    id === null || mongodb.ObjectID.isValid(id) ? new mongodb.ObjectID(id) : null 
+    id === null || id.length == 24 && mongodb.ObjectID.isValid(id) ? new mongodb.ObjectID(id) : null 
 );
 
 exports.v_id = (id) => { 
