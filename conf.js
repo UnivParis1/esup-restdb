@@ -39,7 +39,8 @@ let conf = {
         origin: true /* TODO */,
     },
 
-    triggers: [ ],
+    triggers: {
+    },
 };
 
 module.exports = conf;

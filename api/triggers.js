@@ -1,11 +1,12 @@
 let conf = require('../conf');
 
 exports.call_ = (trigger_name, db_name, req) => {
-    if (!conf.triggers.includes(db_name)) {
+    const module_name = conf.triggers[db_name];
+    if (!module_name) {
         return Promise.resolve();
     }
 
-    const module = require('./triggers/' + db_name); // will throw exception if missing, that's ok
+    const module = require(module_name); // will throw exception if missing, that's ok
     const f = module[trigger_name];
     if (!f) {
         // that's ok, this trigger is not handled
