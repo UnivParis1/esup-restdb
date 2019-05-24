@@ -92,12 +92,17 @@ const addWithUid = (req) => collection(req).then(collection => (
     db.save(collection, v_addUid(req, v_id(null)), req.body)
 ));
 
-const check_acl = (req, user_pseudo_collection) => {
-    if (!req.user) return Promise.resolve(false);
-    if (user_pseudo_collection && !req.params.collection.match(/^admin_/)) return Promise.resolve(!!req.user.id);
-    
-    const filter = conf.ldap.admin_filter(req.user, req.params.db);
-    return ldap.searchRaw(conf.ldap.base, filter, [], { sizeLimit: 1 }).then(l => l.length)
+const check_acl = (req, r_or_w, user_pseudo_collection) => {
+    if (user_pseudo_collection && !req.params.collection.match(/^admin_/)) {
+        return Promise.resolve(!!(req.user && req.user.id));
+    } else {
+        const acl = conf.acls[r_or_w](req.user, req.params.db, req);
+        if (acl && acl.ldap_filter) {
+            return ldap.searchRaw(conf.ldap.base, acl.ldap_filter, [], { sizeLimit: 1 }).then(l => l.length)
+        } else {
+            return Promise.resolve(!!acl);
+        }
+    }
 };
 
 const with_triggers = (f, req) => (
@@ -106,14 +111,14 @@ const with_triggers = (f, req) => (
     ).then(_ => r))
 )
 
-const with_acl = (f, user_pseudo_collection) => (req, res) => (
-    check_acl(req, user_pseudo_collection).then(ok => (
+const with_acl = (f, r_or_w, user_pseudo_collection) => (req, res) => (
+    check_acl(req, r_or_w, user_pseudo_collection).then(ok => (
      ok ? respondJson(req, res, with_triggers(f, req))
         : respondError(req, res, "Unauthorized")
     ))
 );
 
-const with_user_acl = (f) => with_acl(f, true)
+const with_user_acl = (f, r_or_w) => with_acl(f, r_or_w, true)
 
 const login = (req, res) => (
     req.user && req.user.id
@@ -124,16 +129,16 @@ const login = (req, res) => (
 router.use("/.files", express.static(__dirname + '/../client'));
 router.get("/.login", login);
 
-router.get("/:db/:collection/\\$user/:id", with_user_acl(getWithUid));
-router.put('/:db/:collection/\\$user/:id', with_user_acl(putWithUid));
-router.delete('/:db/:collection/\\$user/:id', with_user_acl(deleteWithUid));
-router.post('/:db/:collection/\\$user', with_user_acl(addWithUid));
-router.get('/:db/:collection/\\$user', with_user_acl(getAllWithUid));
-router.get("/:db/:collection/:id", with_acl(get));
-router.put("/:db/:collection/:id", with_acl(put));
-router.delete("/:db/:collection/:id", with_acl(delete_));
-router.post("/:db/:collection", with_acl(add));
-router.get("/:db/:collection", with_acl(getAll));
+router.get("/:db/:collection/\\$user/:id", with_user_acl(getWithUid, "read"));
+router.put('/:db/:collection/\\$user/:id', with_user_acl(putWithUid, "write"));
+router.delete('/:db/:collection/\\$user/:id', with_user_acl(deleteWithUid, "write"));
+router.post('/:db/:collection/\\$user', with_user_acl(addWithUid, "write"));
+router.get('/:db/:collection/\\$user', with_user_acl(getAllWithUid, "read"));
+router.get("/:db/:collection/:id", with_acl(get, "read"));
+router.put("/:db/:collection/:id", with_acl(put, "write"));
+router.delete("/:db/:collection/:id", with_acl(delete_, "write"));
+router.post("/:db/:collection", with_acl(add, "write"));
+router.get("/:db/:collection", with_acl(getAll, "read"));
 
 
 module.exports = router;
