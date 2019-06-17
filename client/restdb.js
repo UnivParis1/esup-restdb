@@ -69,7 +69,7 @@ function restdb_init(conf) {
     }
 
     function get(path, opts, callback) {
-        let url = conf.url + path;
+        var url = conf.url + path;
         var cb = opts.allowRedirect && !(conf.allowJsonp && opts.prompt === 'none') ? redirect_login_onerror(callback, opts) : callback; 
         if (conf.allowJsonp)
             jsonp(url, cb);
@@ -78,7 +78,7 @@ function restdb_init(conf) {
     }
 
     function action(method, path, json, opts, callback) {
-        let url = conf.url + path;
+        var url = conf.url + path;
         var cb = opts.allowRedirect ? redirect_login_onerror(callback, opts) : callback; 
         json_xhr(method, url, json, cb);
     }
