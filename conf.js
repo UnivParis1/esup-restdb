@@ -36,7 +36,7 @@ let conf = {
     },
     session: {
         'secret': 'XXXrestdbXXX',
-        //'FileStore': { path: '/tmp' },
+        //'FileStore': { path: '/tmp', retries: 0 },
     },
     
     // http://expressjs.com/en/guide/behind-proxies.html
