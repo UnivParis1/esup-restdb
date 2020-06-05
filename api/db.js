@@ -48,7 +48,9 @@ exports.collection = (db_name, collection_name) => (
         } else {
             collection = collections_cache[db_name][collection_name] = client.db(dbPrefix + db_name).collection(collection_name);
             return collection.createIndex({ id: 1, uid: 1 }).then(_ =>
-                collection.createIndex({ expireAt: 1 }, { expireAfterSeconds: 0 })
+                collection.createIndex({ uid: 1 }).then(_ =>
+                    collection.createIndex({ expireAt: 1 }, { expireAfterSeconds: 0 })
+                )
             ).then(_ => collection);
         }
     })
