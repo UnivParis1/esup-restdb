@@ -7,6 +7,17 @@ let cas = require('connect-cas');
 let utils = require('./utils');
 let conf = require('../conf');
 
+const is_POST_urlencoded = (req) => (
+    req.method === 'POST' && req.header('Content-Type') === 'application/x-www-form-urlencoded' // checking Content-Type is enough: Restdb never used <form> POST urlencoded, it uses JSON
+)
+
+const ssout = (isSLO) => (req, res, next) => {
+    if (isSLO(req)) {
+        cas.ssout(req.url)(req, res, next)
+    } else {
+        next();
+    }
+}
 
 const cas_getId = (req) => req.session && req.session.cas && req.session.cas.user;
 const external_getId = (req) => req.get('REMOTE_USER');
@@ -69,7 +80,7 @@ module.exports = function (app) {
     if (conf.auth.cas.enabled) {
         cas.configure(conf.auth.cas);
         app.use(session({store: new FileStore(conf.session.FileStore), secret: conf.session.secret, resave: false, saveUninitialized: false}));
-        app.use(cas.serviceValidate(), wrap_req_user(cas_getId));
+        app.use(ssout(is_POST_urlencoded), cas.serviceValidate(), wrap_req_user(cas_getId));
     }
     if (conf.auth.shibboleth.enabled) {
         app.use(wrap_req_user(external_getId));
