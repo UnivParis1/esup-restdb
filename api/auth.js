@@ -4,7 +4,6 @@ let session = require('express-session');
 let FileStore = require('session-file-store')(session);
 var url = require('url');
 let cas = require('connect-cas');
-let cas_ssout = require('./cas-ssout');
 let utils = require('./utils');
 let conf = require('../conf');
 
