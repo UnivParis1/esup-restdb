@@ -71,7 +71,7 @@ const may_login = (req, res, next) => {
 module.exports = function (app) {
     if (conf.auth.cas.enabled) {
         cas.configure(conf.auth.cas);
-        app.use(session({store: new FileStore(conf.session.FileStore), secret: conf.session.secret, resave: false, saveUninitialized: false}));
+        app.use(session({store: new FileStore(conf.session.FileStore), secret: conf.session.secret, cookie: conf.session.cookie, resave: false, saveUninitialized: false}));
         app.use(cas.ssout(is_urlencoded), cas.serviceValidate(), wrap_req_user(cas_getId));
     }
     if (conf.auth.shibboleth.enabled) {
