@@ -9,7 +9,7 @@ let collections_cache = {};
 
 const get_client_raw = () => {
     return mongodb.MongoClient.connect(conf.mongodb.url).then(client => {
-        dbPrefix = client.databaseName;
+        dbPrefix = client.db().databaseName;
         client_cache = client;
         return client;
     })
@@ -76,7 +76,7 @@ exports.save = (collection, criteria, v) => {
     v.modifyTimestamp = new Date();
     if (v.expireAt) v.expireAt = new Date(v.expireAt);
     console.log("saving in DB:", v);
-    return collection.updateOne(criteria, v, {upsert: true}).then(_ => (
+    return collection.replaceOne(criteria, v, {upsert: true}).then(_ => (
         { ok: 1, id: "id" in v ? v.id : v._id }
     ));
 };
