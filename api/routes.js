@@ -94,6 +94,9 @@ const addWithUid = (req) => collection(req).then(collection => (
 const getWithParamUid = (req) => collection(req).then(collection => (
     db.get(collection, { uid: req.params.uid, ...v_id(req.params.id) }).then(v_removeUid)
 ));
+const putWithParamUid = (req) => collection(req).then(collection => (
+    db.save(collection, { uid: req.params.uid, ...v_id(req.params.id) }, req.body).then(v_removeUid)
+));
 
 const check_acl = (req, r_or_w, user_pseudo_collection) => {
     if (user_pseudo_collection && !req.params.collection.match(/^admin_/)) {
@@ -136,6 +139,7 @@ router.get("/:db/:collection/\\$user/:id", with_user_acl(getWithUid, "read"));
 router.put('/:db/:collection/\\$user/:id', with_user_acl(putWithUid, "write"));
 router.delete('/:db/:collection/\\$user/:id', with_user_acl(deleteWithUid, "write"));
 router.get("/:db/:collection/:uid/:id", with_acl(getWithParamUid, "read"));
+router.put("/:db/:collection/:uid/:id", with_acl(putWithParamUid, "write"));
 router.post('/:db/:collection/\\$user', with_user_acl(addWithUid, "write"));
 router.get('/:db/:collection/\\$user', with_user_acl(getAllWithUid, "read"));
 router.get("/:db/:collection/:id", with_acl(get, "read"));
