@@ -3,7 +3,7 @@
   "description": "Esup Rest DB Web Service",
   "version": "0.1.0",
   "dependencies": {
-    "connect-cas": "github:UnivParis1/connect-cas#semver:2.x",
+    "connect-cas": "github:UnivParis1/connect-cas#semver:3.x",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.1",
     "express": "^5.2.1",
