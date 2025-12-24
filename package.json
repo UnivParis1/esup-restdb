@@ -8,7 +8,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.1",
     "express": "4.x",
-    "express-session": "~1.9.3",
+    "express-session": "^1.18.2",
     "express-utils": "~0.1.0",
     "ldapjs": "^3.0.7",
     "lodash": "^4.17.5",
