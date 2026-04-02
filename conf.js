@@ -28,6 +28,7 @@ let conf = {
         cas: {
             enabled: true,
             host: 'cas.univ.fr',
+            overrides: (req) => {}, // req.host.endsWith('.univ2.fr') ? { host: 'cas.univ2.fr' } : {},
         },
         shibboleth: {
             enabled: false,

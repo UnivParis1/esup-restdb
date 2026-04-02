@@ -34,7 +34,8 @@ const may_login_cas = (req, res, next) => {
     if (!conf.auth.cas.enabled || req.query.auth && req.query.auth !== 'cas' || req.query.idpId || !utils.isJsonp(req) && !req.query.then) return false;
 
     req.query.auth_checked = 1;
-    let f = req.query.then && req.query.prompt !== 'none' ? cas.authenticate() : cas.gateway();
+    const overrides = conf.auth.cas.overrides(req)
+    let f = req.query.then && req.query.prompt !== 'none' ? cas.authenticate(overrides) : cas.gateway(overrides);
     f(req, res, next);
     return true;
 };
